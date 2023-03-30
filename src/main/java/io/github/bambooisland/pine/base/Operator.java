@@ -4,5 +4,5 @@ import io.github.bambooisland.pine.base.values.FieldValue;
 
 @FunctionalInterface
 public interface Operator<T extends FieldValue> {
-	public boolean accept(T value, T target);
+    public boolean accept(T value, T target);
 }
