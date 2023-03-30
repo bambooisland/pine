@@ -5,15 +5,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.hssf.usermodel.HSSFWorkbookFactory;
-import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbookFactory;
 
 import io.github.bambooisland.pine.base.Column;
 import io.github.bambooisland.pine.base.Element;
@@ -50,14 +48,9 @@ public class PoiTableBuilder {
     }
 
     private static Sheet initSheet(File target, int index, FileType type) throws IOException {
-        switch (type) {
-        case XLS:
-            POIFSFileSystem file = new POIFSFileSystem(target);
-            return HSSFWorkbookFactory.createWorkbook(file).getSheetAt(index);
-        case XLSX:
-            return new XSSFWorkbookFactory().create(target, null, true).getSheetAt(index);
-        default:
-            throw new VoidOperationException("unsupported format");
+        try (Workbook workbook = WorkbookFactory.create(target)) {
+            Sheet sheet = workbook.getSheetAt(index);
+            return sheet;
         }
     }
 
