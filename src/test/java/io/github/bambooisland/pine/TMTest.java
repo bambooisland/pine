@@ -18,20 +18,30 @@ import io.github.bambooisland.pine.base.values.StringValue;
 import io.github.bambooisland.pine.poi.PoiTableBuilder;
 
 public class TMTest {
-	@Test
-	void test() throws IOException {
-		Table table = PoiTableBuilder.getTable(new File(getClass().getResource("shinkin.xlsx").getPath()), 0);
-		assertTrue(table.getElement(74).getField(1).getValue().equals(new StringValue("東京都中央区")));
-		assertFalse(((BoolValue) table.getField(205, 7).getValue()).getBool());
-		assertEquals(table.getAllColumns().length, 8);
-		assertEquals(table.getNumberOfElements(), 254);
+    @Test
+    void test() throws IOException {
+        Table table = PoiTableBuilder.getTable(new File(getClass().getResource("shinkin.xlsx").getPath()), 0);
+        assertEquals(table.getAllColumns().length, 8);
+        assertFalse(((BoolValue) table.getField(205, 7).getValue()).getBool());
+        testImpl(table);
+        System.out.println("xlsx test finished");
 
-		Extractor ex = table.cloneExtractor();
-		assertEquals(ex.where(1, StringValue.LIKE_PREDICATE, Pattern.compile(".*県.*")).getNumberOfElements(), 201);
+        table = PoiTableBuilder.getTable(new File(getClass().getResource("shinkin.xls").getPath()), 0);
+        assertEquals(table.getAllColumns().length, 7);
+        testImpl(table);
+        System.out.println("xls test finished");
+    }
 
-		ex.cloneExtractor().where(1, StringValue.LIKE_PREDICATE, Pattern.compile(".*区")).forEachElement(ex::delete);
-		assertEquals(ex.getNumberOfElements(), 181);
+    void testImpl(Table table) throws IOException {
+        assertTrue(table.getElement(74).getField(1).getValue().equals(new StringValue("東京都中央区")));
+        assertEquals(table.getNumberOfElements(), 254);
 
-		assertEquals(ex.and(table.cloneExtractor().where(3, DoubleValue.LESS, 1000)).getNumberOfElements(), 27);
-	}
+        Extractor ex = table.cloneExtractor();
+        assertEquals(ex.where(1, StringValue.LIKE_PREDICATE, Pattern.compile(".*県.*")).getNumberOfElements(), 201);
+
+        ex.cloneExtractor().where(1, StringValue.LIKE_PREDICATE, Pattern.compile(".*区")).forEachElement(ex::delete);
+        assertEquals(ex.getNumberOfElements(), 181);
+
+        assertEquals(ex.and(table.cloneExtractor().where(3, DoubleValue.LESS, 1000)).getNumberOfElements(), 27);
+    }
 }
