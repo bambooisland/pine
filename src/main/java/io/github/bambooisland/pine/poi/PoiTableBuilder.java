@@ -1,8 +1,10 @@
 package io.github.bambooisland.pine.poi;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -32,22 +34,26 @@ public class PoiTableBuilder {
 
     public static Table getTable(File target, int index) throws IOException {
         if (target.getPath().endsWith("xlsx")) {
-            return getTable(target, index, FileType.XLSX);
+            try (FileInputStream fis = new FileInputStream(target)) {
+                return getTable(fis, 0, FileType.XLSX);
+            }
         } else if (target.getPath().endsWith("xls")) {
-            return getTable(target, index, FileType.XLS);
+            try (FileInputStream fis = new FileInputStream(target)) {
+                return getTable(fis, 0, FileType.XLS);
+            }
         } else {
             throw new VoidOperationException("unsupported format");
         }
     }
 
-    private static Table getTable(File target, int index, FileType type) throws IOException {
+    public static Table getTable(InputStream target, int index, FileType type) throws IOException {
         Sheet sheet = initSheet(target, index, type);
         Column[] columns = initColumns(sheet);
         Element[] elements = initElements(sheet, columns);
         return new Table(columns, elements);
     }
 
-    private static Sheet initSheet(File target, int index, FileType type) throws IOException {
+    private static Sheet initSheet(InputStream target, int index, FileType type) throws IOException {
         try (Workbook workbook = WorkbookFactory.create(target)) {
             Sheet sheet = workbook.getSheetAt(index);
             return sheet;
